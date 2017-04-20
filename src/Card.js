@@ -9,7 +9,7 @@ export default class Card extends Component {
 
             this.cardRef.style.opacity = 0;
 
-            this.props.moveRestUp(this.cardRef, this.cardRef.getBoundingClientRect().top, ()=>{
+            this.props.moveRestUp(this.cardRef, ()=>{
                 this.props.removeCard(this.props.card);
             });
 

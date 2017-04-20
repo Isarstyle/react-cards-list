@@ -48,10 +48,11 @@ export default class CardsList extends Component {
         }
     }
 
-    moveRestUp(cardElement, dest, callback){
+    moveRestUp(cardElement, callback){
         let nextSibling = cardElement.nextSibling;
         if (nextSibling) {
             let nextTop = nextSibling.getBoundingClientRect().top;
+            let dest = cardElement.getBoundingClientRect().top;
             let delta = dest-nextTop;
             this.moveSiblings(cardElement, delta, callback);
         }
