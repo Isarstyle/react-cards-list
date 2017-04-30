@@ -4,28 +4,42 @@ export default class Card extends Component {
 
     onCardClick() {
 
-        //after ripple. look at index.css
-        this.cardRef.addEventListener('transitionend', ()=>{
+        let delta = this.cardRef.getBoundingClientRect().top-this.cardRef.getBoundingClientRect().bottom-15;
+        const {card} = this.props;
+        this.props.beginRemoveCard(card);
+        this.cardRef.addEventListener('transitionend', (e)=>{
 
-            this.cardRef.style.opacity = 0;
-
-            this.props.moveRestUp(this.cardRef, ()=>{
-                this.props.removeCard(this.props.card);
-            });
-
-
+            if (e.propertyName === 'opacity') this.props.moveRestUp(this.props.card, delta);
         }, {once: true, passive: true, capture: true});
+    }
+
+    componentWillUpdate(nextProps, nextState) {
+        if (nextProps.resetTravel) {
+            this.cardRef.addEventListener('transitionend', (e)=>{
+
+                if (e.propertyName === 'transform') {
+                    this.props.resetTravel();
+                }
+
+            });
+        }
     }
 
     render() {
         const {card} = this.props;
 
-        if (this.cardRef) {
-            this.cardRef.style.transform = '';
+        let travelTo = card.travelTo || 0, className = 'card';
+
+        if (travelTo !== 0) {
+            className += ' traveling';
         }
 
         return (
-            <div className='card' ref={ref => this.cardRef = ref} onClick={this.onCardClick.bind(this)} id={card.id}>
+            <div className={className}
+                 style={{opacity: card.removing ? 0 : 1, transform:`translate3d(0,${travelTo}px,0)`}}
+                 ref={ref => this.cardRef = ref}
+                 onClick={this.onCardClick.bind(this)}
+                 id={card.id}>
                 <div className='card-inner ripple'>
                     <div className="information">
                         <img src={card.imageSrc} className='card-image' alt='some alt'/>
@@ -33,9 +47,7 @@ export default class Card extends Component {
                         <div className="label">{card.label}</div>
                     </div>
                 </div>
-
             </div>
         )
     }
-
 }

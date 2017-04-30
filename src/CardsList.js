@@ -7,6 +7,8 @@ export default class CardsList extends Component {
         super(props);
         this.moveRestUp = this.moveRestUp.bind(this);
         this.removeCard = this.removeCard.bind(this);
+        this.resetTravel = this.resetTravel.bind(this);
+        this.beginRemoveCard = this.beginRemoveCard.bind(this);
         this.state = {
             cards: [
                 {name: 'Card 1', imageSrc: 'https://pbs.twimg.com/profile_images/655066410087940096/QSUlrrlm.png', presentedTime: '10 minutes ago', value: 'Some Value 1', label: 'Some Label 1', id:'1'},
@@ -27,48 +29,50 @@ export default class CardsList extends Component {
 
     removeCard(card) {
         let index = this.state.cards.indexOf(card);
+
         if (index > -1) {
-            this.setState({cards: [...this.state.cards.slice(0, index), ...this.state.cards.slice(index+1)]});
+            return [...this.state.cards.slice(0, index), ...this.state.cards.slice(index+1)];
         }
 
     }
 
-    moveSiblings(node, delta, callback) {
-        let next = node.nextSibling;
-        if (next) {
-            next.style.transition = 'transform 200ms ease-in';
-            next.addEventListener('transitionend', ()=>{
-                next.style.transition = '';
-            });
-            next.style.transform = `translate3d(0,${delta}px,0)`;
-            this.moveSiblings(next, delta, callback);
-        }
-        else {
-            node.addEventListener('transitionend', callback, {once: true, passive: true, capture: true});
-        }
+    beginRemoveCard(card) {
+        let newCards = [...this.state.cards];
+        newCards[newCards.indexOf(card)].removing = true;
+        this.setState({cards: newCards});
     }
 
-    moveRestUp(cardElement, callback){
-        let nextSibling = cardElement.nextSibling;
-        if (nextSibling) {
-            let nextTop = nextSibling.getBoundingClientRect().top;
-            let dest = cardElement.getBoundingClientRect().top;
-            let delta = dest-nextTop;
-            this.moveSiblings(cardElement, delta, callback);
+    moveRestUp(card, delta){
+        let initialCardIndex = this.state.cards.indexOf(card);
+        let newCards = [...this.state.cards];
+        newCards.forEach((currCard, i)=>{
+            if (i>initialCardIndex){
+                currCard.travelTo = delta
+            }
+        });
+
+        this.setState({cards: newCards});
+    }
+
+    resetTravel(){
+        let newCards = this.removeCard(this.state.cards.find(card=>card.removing));
+
+        if (newCards) {
+            newCards.forEach(card=>delete card.travelTo);
+            this.setState({cards: newCards});
         }
-        // else {
-        //     callback();
-        // }
     }
 
     render() {
         return <div className="cards-list">
-            {this.state.cards.map((card)=>{
+            {this.state.cards.map((card, i)=>{
                 return <Card
                     key={card.id}
                     card={card}
                     moveRestUp={this.moveRestUp}
-                    removeCard={this.removeCard}/>
+                    resetTravel={i === this.state.cards.length-1 ? this.resetTravel : null}
+                    // removeCard={this.removeCard}
+                    beginRemoveCard={this.beginRemoveCard}/>
             })}
         </div>
     }
