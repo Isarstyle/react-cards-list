@@ -8,7 +8,6 @@ export default class Card extends Component {
         const {card} = this.props;
         this.props.beginRemoveCard(card);
         this.cardRef.addEventListener('transitionend', (e)=>{
-
             if (e.propertyName === 'opacity') this.props.moveRestUp(this.props.card, delta);
         }, {once: true, passive: true, capture: true});
     }
