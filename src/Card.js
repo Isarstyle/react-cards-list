@@ -24,6 +24,9 @@ export default class Card extends Component {
         }
     }
 
+
+    
+
     render() {
         const {card} = this.props;
 
